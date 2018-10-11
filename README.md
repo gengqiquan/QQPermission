@@ -15,3 +15,7 @@ android 6.0动态权限申请辅助库
             //                        tv_text.text = "拒绝了权限"
         }
  ```
+
+```
+compile 'com.gengqiquan:QQPermission:0.0.1'
+```
