@@ -204,14 +204,6 @@ class DialogBuilder {
 //        return this;
 //    }
 
-    public void show() {
-        if (context instanceof Activity && !((Activity) context).isFinishing()) {
-            builder().show();
-        }
-        WindowManager.LayoutParams lp = dialog.getWindow().getAttributes();
-        lp.width = 1000;
-        dialog.getWindow().setAttributes(lp);
-    }
 
     public Dialog builder() {
         dialog = new Dialog(context, R.style.qq_permission_dialog_style);

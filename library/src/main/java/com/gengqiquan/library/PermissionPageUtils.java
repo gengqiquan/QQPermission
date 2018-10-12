@@ -140,6 +140,7 @@ class PermissionPageUtils {
             intent.putExtra("extra_pkgname", packageName);
         } else {
             goIntentSetting();
+            return;
         }
         mContext.startActivity(intent);
     }
