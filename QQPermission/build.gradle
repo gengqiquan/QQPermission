@@ -3,13 +3,15 @@ apply plugin: 'com.novoda.bintray-release'
 android {
     compileSdkVersion 28
 
-
+    lintOptions {
+        abortOnError false
+    }
 
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 1
-        versionName "1.0"
+        versionCode 3
+        versionName "0.0.3"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -36,7 +38,7 @@ publish {
     userOrg = 'gengqiquan'//bintray.com用户名
     groupId = 'com.gengqiquan'//jcenter上的路径
     artifactId = 'QQPermission'//项目名称
-    publishVersion = '0.0.2'//版本号
+    publishVersion = '0.0.3'//版本号
     desc = 'android permission aoto manager'//描述，不重要
     website = 'https://github.com/gengqiquan/QQPermission'
 }
