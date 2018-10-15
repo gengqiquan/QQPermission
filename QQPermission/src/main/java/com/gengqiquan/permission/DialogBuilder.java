@@ -1,13 +1,11 @@
-package com.gengqiquan.library;
+package com.gengqiquan.permission;
 
-import android.app.Activity;
 import android.app.Dialog;
 import android.content.Context;
 import android.text.SpannableString;
 import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
-import android.view.WindowManager;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 

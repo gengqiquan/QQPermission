@@ -1,11 +1,9 @@
-package com.gengqiquan.library;
+package com.gengqiquan.permission;
 
 import android.app.Activity;
 import android.app.Fragment;
-import android.content.Intent;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.support.v4.app.ActivityCompat;
 
 /**
  * Created by gengqiquan on 2017/7/3.

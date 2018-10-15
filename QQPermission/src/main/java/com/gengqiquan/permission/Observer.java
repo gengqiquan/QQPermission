@@ -1,4 +1,4 @@
-package com.gengqiquan.library;
+package com.gengqiquan.permission;
 
 import java.util.Map;
 

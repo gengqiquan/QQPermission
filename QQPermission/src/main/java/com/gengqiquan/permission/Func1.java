@@ -1,4 +1,4 @@
-package com.gengqiquan.library;
+package com.gengqiquan.permission;
 
 /**
  * Created by gengqiquan on 2018/10/11.

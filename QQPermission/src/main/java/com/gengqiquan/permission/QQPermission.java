@@ -1,4 +1,4 @@
-package com.gengqiquan.library;
+package com.gengqiquan.permission;
 
 import android.annotation.SuppressLint;
 import android.app.Activity;
@@ -109,6 +109,7 @@ public class QQPermission {
                     map.put(permissions[i], true);
                 }
                 subject.post(map);
+                return;
             }
 
             Bundle b = new Bundle();

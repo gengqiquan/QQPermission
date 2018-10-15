@@ -1,9 +1,9 @@
-package com.gengqiquan.permission
+package com.gengqiquan.dome
 
 import android.Manifest
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
-import com.gengqiquan.library.QQPermission
+import com.gengqiquan.permission.QQPermission
 
 
 class MainActivity : AppCompatActivity() {
@@ -12,7 +12,7 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        QQPermission.with(this, Manifest.permission.CALL_PHONE,
+        com.gengqiquan.permission.QQPermission.with(this, Manifest.permission.CALL_PHONE,
                 Manifest.permission.WRITE_EXTERNAL_STORAGE,
                 Manifest.permission.SEND_SMS,
                 Manifest.permission.ACCESS_FINE_LOCATION,
