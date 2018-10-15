@@ -86,10 +86,11 @@ public class QQPermission {
                 result.permit();
                 return;
             }
-            subject.setObserver(new Observer() {
+            subject.subscribe(new Observer() {
                 @Override
                 public void update(Map<String, Boolean> o) {
                     if (checkPermit(o)) {
+                        subject.unSubscribe();
                         result.permit();
                     }
                 }
@@ -175,6 +176,7 @@ public class QQPermission {
                         @Override
                         public void onClick(View v) {
                             dialog.dismiss();
+                            subject.unSubscribe();
                             result.refuse(refuseList);
                         }
                     }).setSettingOnClickListener(new View.OnClickListener() {

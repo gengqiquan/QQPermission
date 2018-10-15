@@ -8,13 +8,17 @@ class QQSubject {
     }
 
 
-    protected void post( Map<String, Boolean> result) {
+    protected void post(Map<String, Boolean> result) {
         observer.update(result);
     }
 
 
-    protected void setObserver(Observer observer) {
+    protected void subscribe(Observer observer) {
         this.observer = observer;
+    }
+
+    protected void unSubscribe() {
+        this.observer = null;
     }
 
     Observer observer;
