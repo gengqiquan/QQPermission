@@ -15,7 +15,7 @@ class MainActivity : AppCompatActivity() {
             com.gengqiquan.permission.QQPermission.with(this,
 //                Manifest.permission.WRITE_EXTERNAL_STORAGE,
                     Manifest.permission.ACCESS_FINE_LOCATION
-            ).silence()
+            )
                     .requestPermissions({
                         //                        tv_text.text = "权限已允许"
                     }
