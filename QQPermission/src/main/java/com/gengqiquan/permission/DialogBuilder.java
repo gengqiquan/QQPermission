@@ -6,6 +6,8 @@ import android.text.SpannableString;
 import android.text.Spanned;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 
@@ -88,36 +90,61 @@ class DialogBuilder {
         return this;
     }
 
+    public DialogBuilder setApplyOnClickListener(View.OnClickListener listener) {
+        ((TextView) mLayout.findViewById(R.id.tv_apply)).setOnClickListener(listener);
+        return this;
+    }
+
     public DialogBuilder message(String message) {
         ((TextView) mLayout.findViewById(R.id.tv_message)).setText(message);
         return this;
     }
-
-    public DialogBuilder darkBack() {
-        darkBack = true;
-        return this;
-    }
+//
+//    public DialogBuilder darkBack() {
+//        darkBack = true;
+//        return this;
+//    }
 
     public DialogBuilder message(Spanned message) {
         ((TextView) mLayout.findViewById(R.id.tv_message)).setText(message);
         return this;
     }
 
-    public DialogBuilder messageGravit(int gravity) {
-        ((LinearLayout) mLayout.findViewById(R.id.tv_message)).setGravity(gravity);
-        return this;
-    }
+//    public DialogBuilder messageGravit(int gravity) {
+//        ((LinearLayout) mLayout.findViewById(R.id.tv_message)).setGravity(gravity);
+//        return this;
+//    }
 
     public DialogBuilder message(SpannableString message) {
         ((TextView) mLayout.findViewById(R.id.tv_message)).setText(message);
         return this;
     }
 
-    public DialogBuilder showSureButton() {
+    public DialogBuilder showApply() {
+        ((TextView) mLayout.findViewById(R.id.tv_apply)).setVisibility(View.VISIBLE);
+        ((TextView) mLayout.findViewById(R.id.tv_setting)).setVisibility(View.GONE);
+        ((TextView) mLayout.findViewById(R.id.tv_sure)).setVisibility(View.GONE);
+        return this;
+    }
+
+    public DialogBuilder showSure() {
+        ((TextView) mLayout.findViewById(R.id.tv_apply)).setVisibility(View.GONE);
+        ((TextView) mLayout.findViewById(R.id.tv_setting)).setVisibility(View.VISIBLE);
         ((TextView) mLayout.findViewById(R.id.tv_sure)).setVisibility(View.VISIBLE);
         return this;
     }
 
+    public DialogBuilder showSetting() {
+        ((TextView) mLayout.findViewById(R.id.tv_apply)).setVisibility(View.GONE);
+        ((TextView) mLayout.findViewById(R.id.tv_setting)).setVisibility(View.VISIBLE);
+        ((TextView) mLayout.findViewById(R.id.tv_sure)).setVisibility(View.GONE);
+        return this;
+    }
+
+    public void shake() {
+        Animation anim = AnimationUtils.loadAnimation(context, R.anim.qq_permission_shake_anim);
+        mLayout.findViewById(R.id.tv_message).startAnimation(anim);
+    }
 //
 //    public DialogBuilder message(int message) {
 //        ((TextView) mLayout.findViewById(R.id.message)).setText(message);

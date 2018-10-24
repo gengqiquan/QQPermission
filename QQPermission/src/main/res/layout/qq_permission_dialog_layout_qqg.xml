@@ -55,7 +55,21 @@
             android:gravity="center"
             android:text="设置"
             android:textColor="#333"
-            android:textSize="16sp" />
+            android:textSize="16sp"
+            android:visibility="gone" />
+
+        <TextView
+            android:id="@+id/tv_apply"
+            android:layout_width="0dp"
+            android:layout_height="30dp"
+            android:layout_marginLeft="10dip"
+            android:layout_weight="1.0"
+            android:background="@drawable/round_666_stoke_radius_4dp"
+            android:gravity="center"
+            android:text="重新授权"
+            android:textColor="#333"
+            android:textSize="16sp"
+            android:visibility="gone" />
 
         <TextView
             android:id="@+id/tv_sure"

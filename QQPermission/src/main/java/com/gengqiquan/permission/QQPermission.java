@@ -3,19 +3,28 @@ package com.gengqiquan.permission;
 import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.app.Dialog;
+import android.content.Context;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
+import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.ArraySet;
 import android.util.ArrayMap;
 import android.view.View;
+import android.widget.Toast;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -24,6 +33,16 @@ import java.util.Set;
  * Created by gengqiquan on 2018/10/10.
  */
 
+/**
+ * 1、showTips =TRUE ：
+ * 拒绝后显示提示弹框
+ * 2、showTips =false：
+ * 拒绝不显示提示弹框
+ * 若勾选了系统权限申请弹框中的不再提示，则以后再次申请直接显示提示弹框
+ *
+ * @author gengqiquan
+ * @date 2018/10/17 下午3:29
+ */
 public class QQPermission {
     static QQSubject subject = new QQSubject();
 
@@ -34,16 +53,53 @@ public class QQPermission {
     public static class Builder {
         Activity activity;
         String[] permissions;
-        QQResult result;
+        IResult result;
         TipsProxy tipsProxy;
+        boolean showTips = true;
+        boolean silence = false;
+        String tipsFormat = "当前功能需要您允许：{0}\n请前往手机的\"设置-应用信息-权限\"中开启权限\n否则您将无法使用该功能";
 
         private Builder(Activity t, String[] p) {
             activity = t;
             permissions = p;
         }
 
-        public void tipsProxy(TipsProxy tipsProxy) {
+        /**
+         * 弹框文案显示代理
+         *
+         * @author gengqiquan
+         * @date 2018/10/18 下午4:32
+         */
+        public Builder tipsProxy(TipsProxy tipsProxy) {
             this.tipsProxy = tipsProxy;
+            return this;
+        }
+
+        /**
+         * 拒绝后显示自定义弹框
+         *
+         * @author gengqiquan
+         * @date 2018/10/18 下午4:31
+         */
+        public Builder hideTips() {
+            this.showTips = false;
+            return this;
+        }
+
+        /**
+         * 静默申请
+         *
+         * @author gengqiquan
+         * @date 2018/10/18 下午4:31
+         */
+
+        public Builder silence() {
+            this.silence = true;
+            return this;
+        }
+
+        public void requestPermissions() {
+            requestPermissions(new QQResult(null, null));
         }
 
         public void requestPermissions(Func1 func1) {
@@ -54,15 +110,15 @@ public class QQPermission {
             requestPermissions(new QQResult(func1, func2));
         }
 
+        public void requestPermissions(final IResult r) {
+            requestPermissions(r, true);
+        }
 
         @SuppressLint("NewApi")
-        public void requestPermissions(final QQResult r) {
+        private void requestPermissions(final IResult r, boolean first) {
             result = r;
             if (tipsProxy == null) {
                 tipsProxy = new TipsProxy() {
-
-                    String tips = "当前功能需要您允许：{0}\n请前往手机的\"设置-应用信息-权限\"中开启权限\n否则您将无法使用该功能";
-
                     @Override
                     public String makeText(Set<PermissionGroupInfo> groupInfos) {
 
@@ -75,7 +131,7 @@ public class QQPermission {
                                 text.append("\n" + "-").append(d);
                             }
                         }
-                        return MessageFormat.format(tips, text.toString());
+                        return MessageFormat.format(tipsFormat, text.toString());
                     }
                 };
             }
@@ -83,6 +139,23 @@ public class QQPermission {
                 throw new RuntimeException("permission can not be null");
             }
             if (Build.VERSION.SDK_INT < Build.VERSION_CODES.M) {
+                result.permit();
+                return;
+            }
+
+            boolean need = false;
+            againList.clear();
+            for (int i = 0, l = permissions.length; i < l; i++) {
+                int p = ContextCompat.checkSelfPermission(activity, permissions[i]);
+                if (p != PackageManager.PERMISSION_GRANTED) {
+                    need = true;
+                }
+                boolean again = ActivityCompat.shouldShowRequestPermissionRationale(activity, permissions[i]);
+                if (!again) {
+                    againList.add(permissions[i]);
+                }
+            }
+            if (!need) {//全部允许了
                 result.permit();
                 return;
             }
@@ -95,23 +168,9 @@ public class QQPermission {
                     }
                 }
             });
-            boolean need = false;
-            for (int i = 0, l = permissions.length; i < l; i++) {
-                int p = ContextCompat.checkSelfPermission(activity, permissions[i]);
-                if (p != PackageManager.PERMISSION_GRANTED) {
-                    need = true;
-                    break;
-                }
+            for (String permission : permissions) {
+                apply(activity, permission);
             }
-            if (!need) {
-                Map<String, Boolean> map = new ArrayMap<>();
-                for (int i = 0, l = permissions.length; i < l; i++) {
-                    map.put(permissions[i], true);
-                }
-                subject.post(map);
-                return;
-            }
-
             Bundle b = new Bundle();
             b.putStringArray("permission", permissions);
             final QQFragment appFragment = new QQFragment();
@@ -123,21 +182,74 @@ public class QQPermission {
         }
 
         Dialog dialog;
-
         @SuppressLint("NewApi")
         List<String> refuseList = new ArrayList<>();
+        List<String> againList = new ArrayList<>();
 
         boolean checkPermit(Map<String, Boolean> map) {
             if (!map.containsValue(false)) {
                 return true;
             }
+
             if (dialog == null) {
                 createDialog();
             }
-            if (!dialog.isShowing() && !activity.isFinishing()) {
-                dialog.show();
+            changeMessage(map);
+
+            boolean showUI = false;
+            for (String ps : refuseList) {
+                //again：false 为首次申请或者被拒绝且勾选了不再提示（系统申请弹框）
+                boolean again = ActivityCompat.shouldShowRequestPermissionRationale(activity, ps);
+
+                showUI = applyTimes(activity, ps) > 1 && againList.contains(ps) && !again;
+
+                if (showUI) {  //当前非首次申请且申请前是false，申请后也是false ，说明不是本次申请勾选的不再提示，而是之前勾选的。
+                    break;
+                }
+            }
+            if (silence) {//静默申请，如获取通讯录这种
+                result.refuse(refuseList);
+                return false;
             }
 
+            if (showUI) {
+                // 此时需要弹框告知用户为啥需要权限并引导用户去设置打开，
+                // 否则用户可能点击后无任何界面反应或者界面直接打开就关闭了
+                if (!dialog.isShowing() && !activity.isFinishing()) {
+                    dialogBuilder.showSetting();
+                    dialog.show();
+                }
+                return false;
+            }
+            if (showTips) {//需要弹框告知用户为啥需要权限(强制弹框，例如在相机界面里面的申请，无二次提示界面没任何反应可能就关闭了)
+                if (!dialog.isShowing() && !activity.isFinishing()) {
+                    boolean again = false;
+                    for (String ps : refuseList) {
+                        again = ActivityCompat.shouldShowRequestPermissionRationale(activity, ps);
+                        again = !again && applyTimes(activity, ps) > 1;
+                        if (again) {
+                            break;
+                        }
+                    }
+                    if (again) {//勾选了不再提示，直接显示设置界面
+                        dialogBuilder.showSetting();
+                    } else {
+                        dialogBuilder.showApply();
+                    }
+                    dialog.show();
+                }
+                return false;
+
+            }
+
+            if (dialog.isShowing() && !activity.isFinishing()) {
+                dialog.dismiss();
+            }
+            result.refuse(refuseList);
+            return false;
+        }
+
+        private void changeMessage(Map<String, Boolean> map) {
             if (!refuseList.isEmpty()) {
                 refuseList.clear();
             }
@@ -158,19 +270,35 @@ public class QQPermission {
                     }
                 }
             }
-
             dialogBuilder.message(tipsProxy.makeText(groupInfos));
-            return false;
         }
 
         DialogBuilder dialogBuilder;
 
         void createDialog() {
             dialogBuilder = new DialogBuilder(activity)
+                    .setApplyOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View v) {
+                            dialog.dismiss();
+                            requestPermissions(result);
+                        }
+                    })
                     .setSureOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            requestPermissions(result);
+                            Map<String, Boolean> map = new LinkedHashMap<>();
+                            for (int i = 0, l = permissions.length; i < l; i++) {
+                                int p = ContextCompat.checkSelfPermission(activity, permissions[i]);
+                                map.put(permissions[i], p == PackageManager.PERMISSION_GRANTED);
+                            }
+                            if (!map.containsValue(false)) {
+                                dialog.dismiss();
+                                result.permit();
+                                return;
+                            }
+                            changeMessage(map);
+                            dialogBuilder.shake();
                         }
                     })
                     .setCancelOnClickListener(new View.OnClickListener() {
@@ -183,8 +311,20 @@ public class QQPermission {
                     }).setSettingOnClickListener(new View.OnClickListener() {
                         @Override
                         public void onClick(View v) {
-                            dialogBuilder.showSureButton();
-                            new PermissionPageUtils(activity).jumpPermissionPage();
+                            Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
+                            try {
+                                Uri uri = Uri.fromParts("package", activity.getApplicationContext().getPackageName(), null);
+                                intent.setData(uri);
+                                activity.startActivity(intent);
+                                new Handler().postDelayed(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        dialogBuilder.showSure();
+                                    }
+                                }, 1000);
+                            } catch (Exception e) {
+                                Toast.makeText(activity, "找不到设置页，请手动进入界面", Toast.LENGTH_SHORT).show();
+                            }
                         }
                     });
             dialog = dialogBuilder.builder();
@@ -193,12 +333,28 @@ public class QQPermission {
 
     @SuppressLint("NewApi")
     protected static void post(@NonNull String[] permissions, @NonNull int[] grantResults) {
-        Map<String, Boolean> map = new ArrayMap<>();
+        Map<String, Boolean> map = new LinkedHashMap<>();
         for (int i = 0, l = permissions.length; i < l; i++) {
             map.put(permissions[i], grantResults[i] == PackageManager.PERMISSION_GRANTED);
         }
         subject.post(map);
     }
 
+    private static SharedPreferences getDefaultSharedPreferences(Context context) {
+        return context.getApplicationContext().getSharedPreferences(
+                "QQPermission", Context.MODE_PRIVATE);
+    }
 
+    private static void apply(Context context, String key) {
+        SharedPreferences sharedPreferences = getDefaultSharedPreferences(context);
+        SharedPreferences.Editor edit = sharedPreferences.edit();
+        int times = sharedPreferences.getInt(key, 0);
+        edit.putInt(key, ++times);
+        edit.apply();
+    }
+
+    private static int applyTimes(Context context, String key) {
+        SharedPreferences sharedPreferences = getDefaultSharedPreferences(context);
+        return sharedPreferences.getInt(key, 0);
+    }
 }

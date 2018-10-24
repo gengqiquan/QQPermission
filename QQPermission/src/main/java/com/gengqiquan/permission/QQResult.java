@@ -6,7 +6,7 @@ import java.util.List;
  * Created by gengqiquan on 2017/7/4.
  */
 
-public class QQResult {
+public class QQResult implements IResult {
     Func1 func1;
     Func2 func2;
 
@@ -21,7 +21,8 @@ public class QQResult {
      * @author gengqiquan
      * @date 2018/10/11 下午2:24
      */
-    void permit() {
+    @Override
+    public void permit() {
         if (func1 != null) {
             func1.permit();
         }
@@ -33,7 +34,8 @@ public class QQResult {
      * @author gengqiquan
      * @date 2018/10/11 下午2:24
      */
-    void refuse(List<String> list) {
+    @Override
+    public void refuse(List<String> list) {
         if (func2 != null)
             func2.refuse(list);
     }
