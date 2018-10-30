@@ -3,11 +3,7 @@ package com.gengqiquan.permission;
 
 import java.util.Map;
 
-class QQSubject {
-    public QQSubject() {
-    }
-
-
+class Request {
     protected void post(Map<String, Boolean> result) {
         observer.update(result);
     }
@@ -17,11 +13,12 @@ class QQSubject {
         this.observer = observer;
     }
 
-    protected void unSubscribe() {
-        this.observer = null;
-    }
-
     Observer observer;
+    String[] permissions;
+
+    public Request(String[] permissions) {
+        this.permissions = permissions;
+    }
 }
 
 

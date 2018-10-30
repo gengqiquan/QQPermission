@@ -18,7 +18,6 @@ import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.ArraySet;
-import android.util.ArrayMap;
 import android.view.View;
 import android.widget.Toast;
 
@@ -44,7 +43,6 @@ import java.util.Set;
  * @date 2018/10/17 下午3:29
  */
 public class QQPermission {
-    static QQSubject subject = new QQSubject();
 
     public static Builder with(Activity t, String... p) {
         return new Builder(t, p);
@@ -58,10 +56,12 @@ public class QQPermission {
         boolean showTips = true;
         boolean silence = false;
         String tipsFormat = "当前功能需要您允许：{0}\n请前往手机的\"设置-应用信息-权限\"中开启权限\n否则您将无法使用该功能";
+        Request request;
 
         private Builder(Activity t, String[] p) {
             activity = t;
             permissions = p;
+            request = new Request(permissions);
         }
 
         /**
@@ -159,22 +159,21 @@ public class QQPermission {
                 result.permit();
                 return;
             }
-            subject.subscribe(new Observer() {
+
+            for (String permission : permissions) {
+                apply(activity, permission);
+            }
+
+            request.subscribe(new Observer() {
                 @Override
                 public void update(Map<String, Boolean> o) {
                     if (checkPermit(o)) {
-                        subject.unSubscribe();
                         result.permit();
                     }
                 }
             });
-            for (String permission : permissions) {
-                apply(activity, permission);
-            }
-            Bundle b = new Bundle();
-            b.putStringArray("permission", permissions);
             final QQFragment appFragment = new QQFragment();
-            appFragment.setArguments(b);
+            appFragment.setRequest(request);
 
             activity.getFragmentManager()
                     .beginTransaction().replace(android.R.id.content, appFragment)
@@ -305,7 +304,6 @@ public class QQPermission {
                         @Override
                         public void onClick(View v) {
                             dialog.dismiss();
-                            subject.unSubscribe();
                             result.refuse(refuseList);
                         }
                     }).setSettingOnClickListener(new View.OnClickListener() {
@@ -313,7 +311,7 @@ public class QQPermission {
                         public void onClick(View v) {
                             Intent intent = new Intent(Settings.ACTION_APPLICATION_DETAILS_SETTINGS);
                             try {
-                                Uri uri = Uri.fromParts("package", activity.getApplicationContext().getPackageName(), null);
+                                Uri uri = Uri.fromParts("package", activity.getPackageName(), null);
                                 intent.setData(uri);
                                 activity.startActivity(intent);
                                 new Handler().postDelayed(new Runnable() {
@@ -331,14 +329,6 @@ public class QQPermission {
         }
     }
 
-    @SuppressLint("NewApi")
-    protected static void post(@NonNull String[] permissions, @NonNull int[] grantResults) {
-        Map<String, Boolean> map = new LinkedHashMap<>();
-        for (int i = 0, l = permissions.length; i < l; i++) {
-            map.put(permissions[i], grantResults[i] == PackageManager.PERMISSION_GRANTED);
-        }
-        subject.post(map);
-    }
 
     private static SharedPreferences getDefaultSharedPreferences(Context context) {
         return context.getApplicationContext().getSharedPreferences(

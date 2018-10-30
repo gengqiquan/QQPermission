@@ -6,7 +6,7 @@ import java.util.List;
  * Created by gengqiquan on 2017/7/4.
  */
 
-public class QQResult implements IResult {
+ class QQResult implements IResult {
     Func1 func1;
     Func2 func2;
 
