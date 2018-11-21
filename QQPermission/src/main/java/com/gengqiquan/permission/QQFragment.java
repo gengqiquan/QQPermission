@@ -17,11 +17,11 @@ public class QQFragment extends Fragment {
 
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
-        Map<String, Boolean> map = new LinkedHashMap<>();
-        for (int i = 0, l = permissions.length; i < l; i++) {
-            map.put(permissions[i], grantResults[i] == PackageManager.PERMISSION_GRANTED);
-        }
-        if (request != null) {
+        if (request != null && request.hashCode() == requestCode) {
+            Map<String, Boolean> map = new LinkedHashMap<>();
+            for (int i = 0, l = permissions.length; i < l; i++) {
+                map.put(permissions[i], grantResults[i] == PackageManager.PERMISSION_GRANTED);
+            }
             request.post(map);
             request = null;
         }
@@ -36,7 +36,7 @@ public class QQFragment extends Fragment {
         super.onAttach(activity);
         if (request != null) {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
-                requestPermissions(request.permissions, 0);
+                requestPermissions(request.permissions, request.hashCode());
             }
         }
     }

@@ -172,7 +172,6 @@ public class QQPermission {
             });
             final QQFragment appFragment = new QQFragment();
             appFragment.setRequest(request);
-
             activity.getFragmentManager()
                     .beginTransaction().add(android.R.id.content, appFragment)
                     .commitAllowingStateLoss();
