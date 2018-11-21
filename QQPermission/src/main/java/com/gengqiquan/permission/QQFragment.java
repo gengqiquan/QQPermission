@@ -5,7 +5,6 @@ import android.app.Fragment;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.support.annotation.NonNull;
-import android.util.Log;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -22,8 +21,10 @@ public class QQFragment extends Fragment {
         for (int i = 0, l = permissions.length; i < l; i++) {
             map.put(permissions[i], grantResults[i] == PackageManager.PERMISSION_GRANTED);
         }
-        request.post(map);
-        request = null;
+        if (request != null) {
+            request.post(map);
+            request = null;
+        }
         this.getActivity().getFragmentManager().beginTransaction().remove(this).commitAllowingStateLoss();
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }

@@ -10,8 +10,8 @@ android {
     defaultConfig {
         minSdkVersion 14
         targetSdkVersion 28
-        versionCode 8
-        versionName "0.0.8"
+        versionCode 10
+        versionName "0.0.10"
 
         testInstrumentationRunner "android.support.test.runner.AndroidJUnitRunner"
 
@@ -29,7 +29,7 @@ android {
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'com.android.support:appcompat-v7:28.0.0'
+    compileOnly 'com.android.support:appcompat-v7:28.0.0'
     testImplementation 'junit:junit:4.12'
     androidTestImplementation 'com.android.support.test:runner:1.0.2'
     androidTestImplementation 'com.android.support.test.espresso:espresso-core:3.0.2'
@@ -38,7 +38,7 @@ publish {
     userOrg = 'gengqiquan'//bintray.com用户名
     groupId = 'com.gengqiquan'//jcenter上的路径
     artifactId = 'QQPermission'//项目名称
-    publishVersion = '0.0.8'//版本号
+    publishVersion = '0.0.10'//版本号
     desc = 'android permission aoto manager'//描述，不重要
     website = 'https://github.com/gengqiquan/QQPermission'
 }

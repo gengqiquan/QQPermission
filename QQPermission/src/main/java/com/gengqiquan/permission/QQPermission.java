@@ -11,10 +11,8 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.os.Handler;
 import android.provider.Settings;
-import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.content.ContextCompat;
 import android.support.v4.util.ArraySet;
@@ -176,7 +174,7 @@ public class QQPermission {
             appFragment.setRequest(request);
 
             activity.getFragmentManager()
-                    .beginTransaction().replace(android.R.id.content, appFragment)
+                    .beginTransaction().add(android.R.id.content, appFragment)
                     .commitAllowingStateLoss();
         }
 
