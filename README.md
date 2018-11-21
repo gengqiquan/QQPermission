@@ -17,5 +17,5 @@ android 6.0动态权限申请辅助库
  ```
 
 ```
-compile 'com.gengqiquan:QQPermission:0.0.7'
+compile 'com.gengqiquan:QQPermission:0.0.11'
 ```
